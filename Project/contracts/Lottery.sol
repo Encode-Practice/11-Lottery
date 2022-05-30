@@ -30,7 +30,7 @@ contract Lottery is Ownable {
     mapping(address => uint256) public prize;
 
     /// @dev List of bet slots
-    address[] _slots;
+    address[] internal _slots;
 
     /// @notice Constructor function
     /// @param tokenName Name of the token used for payment
@@ -79,8 +79,19 @@ contract Lottery is Ownable {
         _slots.push(msg.sender);
     }
 
+    /// @dev improvement over betMany0, saves more gas
+    function betMany(uint256 times) public whenBetsOpen {
+        require(times > 0);
+        paymentToken.transferFrom(msg.sender, address(this), (betPrice + betFee)*times);
+        ownerPool += betFee*times;
+        prizePool += betPrice*times;
+        for (uint i = 0; i < times; i++) {
+            _slots.push(msg.sender);
+        }
+    }
+
     /// @notice Call the bet function `times` times
-    function betMany(uint256 times) public {
+    function betMany0(uint256 times) public {
         require(times > 0);
         while (times > 0) {
             bet();
@@ -93,6 +104,7 @@ contract Lottery is Ownable {
     function closeLottery() public {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
         require(_betsOpen, "Already closed");
+        _betsOpen = false; // security measure 
         if (_slots.length > 0) {
             uint256 winnerIndex = getRandomNumber() % _slots.length;
             address winner = _slots[winnerIndex];
@@ -100,7 +112,6 @@ contract Lottery is Ownable {
             prizePool = 0;
             delete (_slots);
         }
-        _betsOpen = false;
     }
 
     /// @notice Get a random number calculated from the block hash of last block
