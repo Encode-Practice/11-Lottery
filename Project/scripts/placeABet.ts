@@ -30,7 +30,7 @@ async function initContracts() {
   contract = await contractFactory.deploy(
     "LotteryToken",
     "LT0",
-    RATIO, \
+    RATIO,
     ethers.utils.parseEther(BET_PRICE),
     ethers.utils.parseEther(BET_FEE),
     SEED
