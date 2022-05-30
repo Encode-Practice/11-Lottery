@@ -28,9 +28,11 @@ contract Lottery is Ownable {
     uint256 public betsClosingTime;
     /// @notice Mapping of prize available for withdraw for each account
     mapping(address => uint256) public prize;
-
     /// @dev List of bet slots
     address[] internal _slots;
+    /// @notice seed for random number generation made by the contract owner. 
+    bytes32 private sealedSeed;
+
 
     /// @notice Constructor function
     /// @param tokenName Name of the token used for payment
@@ -43,12 +45,14 @@ contract Lottery is Ownable {
         string memory tokenSymbol,
         uint256 _purchaseRatio,
         uint256 _betPrice,
-        uint256 _betFee
+        uint256 _betFee, 
+        string memory _seed
     ) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
         purchaseRatio = _purchaseRatio;
         betPrice = _betPrice;
         betFee = _betFee;
+        sealedSeed = keccak256(abi.encode(msg.sender, _seed));
     }
 
     ///@return _betsOpen, which is bool internal
@@ -101,12 +105,13 @@ contract Lottery is Ownable {
 
     /// @notice Close the lottery and calculates the prize, if any
     /// @dev Anyone can call this function if the owner fails to do so
-    function closeLottery() public {
+    function closeLottery(string calldata seed) public {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
         require(_betsOpen, "Already closed");
+        require(sealedSeed == keccak256(abi.encode(owner(), seed)), "Wrong seed");
         _betsOpen = false; // security measure 
         if (_slots.length > 0) {
-            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            uint256 winnerIndex = getRandomNumber(seed) % _slots.length;
             address winner = _slots[winnerIndex];
             prize[winner] += prizePool;
             prizePool = 0;
@@ -115,13 +120,10 @@ contract Lottery is Ownable {
     }
 
     /// @notice Get a random number calculated from the block hash of last block
-    /// @dev This number could be exploited by miners
-    function getRandomNumber()
-        public
-        view
-        returns (uint256 notQuiteRandomNumber)
-    {
-        notQuiteRandomNumber = uint256(blockhash(block.number - 1));
+    /// @dev Only those who know the seed can expolit the random number. 
+    function getRandomNumber(string calldata seed)
+        public view returns (uint256 notQuiteRandomNumber){
+        return uint256(keccak256(abi.encode(seed, blockhash(block.number-1))));
     }
 
     /// @notice Withdraw `amount` from that accounts prize pool
