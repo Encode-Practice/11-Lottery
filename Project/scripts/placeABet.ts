@@ -27,7 +27,7 @@ async function initContracts() {
   contract = await contractFactory.deploy(
     "LotteryToken",
     "LT0",
-    ethers.utils.parseEther(RATIO.toFixed(18)),
+    RATIO, //RATIO.toFixed(18),
     ethers.utils.parseEther(BET_PRICE.toFixed(18)),
     ethers.utils.parseEther(BET_FEE.toFixed(18))
   );
