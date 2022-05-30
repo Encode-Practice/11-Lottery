@@ -23,7 +23,7 @@ contract Lottery is Ownable {
     /// @notice Amount of tokens in the owner pool
     uint256 public ownerPool;
     /// @notice Flag indicating if the lottery is open for bets
-    bool public betsOpen;
+    bool internal _betsOpen;
     /// @notice Timestamp of the lottery next closing date
     uint256 public betsClosingTime;
     /// @notice Mapping of prize available for withdraw for each account
@@ -53,14 +53,14 @@ contract Lottery is Ownable {
 
     /// @notice Passes when the lottery is at closed state
     modifier whenBetsClosed() {
-        require(!betsOpen, "Lottery is open");
+        require(!_betsOpen, "Lottery is open");
         _;
     }
 
     /// @notice Passes when the lottery is at open state and the current block timestamp is lower than the lottery closing date
     modifier whenBetsOpen() {
         require(
-            betsOpen && block.timestamp < betsClosingTime,
+            _betsOpen && block.timestamp < betsClosingTime,
             "Lottery is closed"
         );
         _;
@@ -73,7 +73,7 @@ contract Lottery is Ownable {
             "Closing time must be in the future"
         );
         betsClosingTime = closingTime;
-        betsOpen = true;
+        _betsOpen = true;
     }
 
     /// @notice Give tokens based on the amount of ETH sent
@@ -102,7 +102,7 @@ contract Lottery is Ownable {
     /// @dev Anyone can call this function if the owner fails to do so
     function closeLottery() public {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
-        require(betsOpen, "Already closed");
+        require(_betsOpen, "Already closed");
         if (_slots.length > 0) {
             uint256 winnerIndex = getRandomNumber() % _slots.length;
             address winner = _slots[winnerIndex];
@@ -110,7 +110,7 @@ contract Lottery is Ownable {
             prizePool = 0;
             delete (_slots);
         }
-        betsOpen = false;
+        _betsOpen = false;
     }
 
     /// @notice Get a random number calculated from the block hash of last block
