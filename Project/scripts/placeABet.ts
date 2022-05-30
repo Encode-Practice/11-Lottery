@@ -9,8 +9,9 @@ let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
-const BET_FEE = 0.2;
+const BET_FEE = 0.20;
 const RATIO = 1;
+const SEED = 'popcorn';
 
 async function main() {
   await initContracts();
@@ -29,7 +30,8 @@ async function initContracts() {
     "LT0",
     RATIO, //RATIO.toFixed(18),
     ethers.utils.parseEther(BET_PRICE.toFixed(18)),
-    ethers.utils.parseEther(BET_FEE.toFixed(18))
+    ethers.utils.parseEther(BET_FEE.toFixed(18)),
+    SEED
   );
   await contract.deployed();
   const tokenAddress = await contract.paymentToken();
@@ -228,7 +230,7 @@ async function bet(index: string, amount: string) {
 }
 
 async function closeLottery() {
-  const tx = await contract.closeLottery();
+  const tx = await contract.closeLottery(SEED);
   const receipt = await tx.wait();
   console.log(`Bets closed (${receipt.transactionHash})\n`);
 }
