@@ -57,6 +57,11 @@ contract Lottery is Ownable {
         _;
     }
 
+    ///@return _betsOpen, which is bool internal
+    function betsOpen() public view returns (bool) {
+        return _betsOpen;
+    }
+
     /// @notice Passes when the lottery is at open state and the current block timestamp is lower than the lottery closing date
     modifier whenBetsOpen() {
         require(
