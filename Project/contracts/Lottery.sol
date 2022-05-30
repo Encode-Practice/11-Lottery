@@ -51,24 +51,9 @@ contract Lottery is Ownable {
         betFee = _betFee;
     }
 
-    /// @notice Passes when the lottery is at closed state
-    modifier whenBetsClosed() {
-        require(!_betsOpen, "Lottery is open");
-        _;
-    }
-
     ///@return _betsOpen, which is bool internal
     function betsOpen() public view returns (bool) {
         return _betsOpen;
-    }
-
-    /// @notice Passes when the lottery is at open state and the current block timestamp is lower than the lottery closing date
-    modifier whenBetsOpen() {
-        require(
-            _betsOpen && block.timestamp < betsClosingTime,
-            "Lottery is closed"
-        );
-        _;
     }
 
     /// @notice Open the lottery for receiving bets
@@ -146,5 +131,21 @@ contract Lottery is Ownable {
     function returnTokens(uint256 amount) public {
         paymentToken.burnFrom(msg.sender, amount);
         payable(msg.sender).transfer(amount * purchaseRatio);
+    }
+
+
+    /// @notice Passes when the lottery is at closed state
+    modifier whenBetsClosed() {
+        require(!_betsOpen, "Lottery is open");
+        _;
+    }
+
+    /// @notice Passes when the lottery is at open state and the current block timestamp is lower than the lottery closing date
+    modifier whenBetsOpen() {
+        require(
+            _betsOpen && block.timestamp < betsClosingTime,
+            "Lottery is closed"
+        );
+        _;
     }
 }
