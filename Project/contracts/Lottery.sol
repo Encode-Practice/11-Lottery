@@ -40,6 +40,7 @@ contract Lottery is Ownable {
     /// @param _purchaseRatio Amount of ETH charged per Token purchased
     /// @param _betPrice Amount of tokens required for placing a bet that goes for the prize pool
     /// @param _betFee Amount of tokens required for placing a bet that goes for the owner pool
+    /// @param _seed Secrete seed that is used to hash the random number. 
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
@@ -103,8 +104,7 @@ contract Lottery is Ownable {
         }
     }
 
-    /// @notice Close the lottery and calculates the prize, if any
-    /// @dev Anyone can call this function if the owner fails to do so
+    /// @notice Close the lottery and calculates the prize, if any. Must know secrete seed. 
     function closeLottery(string calldata seed) public {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
         require(_betsOpen, "Already closed");
