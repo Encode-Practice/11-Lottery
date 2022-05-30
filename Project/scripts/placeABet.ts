@@ -8,12 +8,14 @@ let contract: Lottery;
 let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
-const BET_PRICE = 1;
-const BET_FEE = 0.20;
-const RATIO = 1;
+const BET_PRICE = "1"; // should be string or integer
+const BET_FEE = "0.20"; // decimal numbers could lose precision. 
+const RATIO = 2; // must be integer
 const SEED = 'popcorn';
 
 async function main() {
+  console.log(`Bet price is ${BET_PRICE}.`);
+  console.log(`Bet price is ${BET_FEE}.`);
   await initContracts();
   await initAccounts();
   const rl = readline.createInterface({
@@ -28,9 +30,9 @@ async function initContracts() {
   contract = await contractFactory.deploy(
     "LotteryToken",
     "LT0",
-    RATIO, //RATIO.toFixed(18),
-    ethers.utils.parseEther(BET_PRICE.toFixed(18)),
-    ethers.utils.parseEther(BET_FEE.toFixed(18)),
+    RATIO, \
+    ethers.utils.parseEther(BET_PRICE),
+    ethers.utils.parseEther(BET_FEE),
     SEED
   );
   await contract.deployed();
