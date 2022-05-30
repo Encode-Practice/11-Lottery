@@ -10,6 +10,7 @@ let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
 const BET_FEE = 0.2;
+const RATIO = 1;
 
 async function main() {
   await initContracts();
@@ -26,7 +27,7 @@ async function initContracts() {
   contract = await contractFactory.deploy(
     "LotteryToken",
     "LT0",
-    1,
+    ethers.utils.parseEther(RATIO.toFixed(18)),
     ethers.utils.parseEther(BET_PRICE.toFixed(18)),
     ethers.utils.parseEther(BET_FEE.toFixed(18))
   );
